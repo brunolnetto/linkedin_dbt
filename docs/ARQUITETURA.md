@@ -71,8 +71,9 @@ Versão atual: `where is_current` (público) ou `where dbt_valid_to is null` (cl
 |---|---|---|
 | `linkedin_export` | vazio | Caminho do .xlsx a carregar. O `ingest.sh` preenche. |
 | `force_reload` | `false` | Regrava um export já carregado (ex.: depois de mudar o staging). |
-| `baseline_max_impressions` | 40 | Dias abaixo disso contam como "quase sem impressões" na base de seguidores. |
-| `follower_attribution_days` | 3 | Janela para atribuir seguidores a um post (dia do post + seguintes). |
+| `low_activity_quantile` | 0.25 | Fração dos dias com menos impressões da conta que conta como "quase sem impressões" (base de seguidores). Relativo ao tamanho da conta. |
+| `follower_attribution_days` | automático | Janela para atribuir seguidores a um post (dia do post + seguintes). Automático: metade do intervalo típico entre posts, de 1 a 3 dias. |
+| `top_posts_list_limit` | 50 | Tamanho máximo das listas da aba TOP POSTS. Quando uma lista chega nele, o relatório avisa que as análises por post só veem os melhores posts. |
 
 Recarregar um export já carregado:
 

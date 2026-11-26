@@ -1,15 +1,19 @@
 version: 2
 models:
   - name: fct_linkedin__daily
-    description: Série diária com taxa de engajamento e médias móveis de 7 dias.
+    description: >
+      Série diária com taxa de engajamento, médias móveis de 7 dias e is_low_activity_day
+      (dia entre os var low_activity_quantile com menos impressões da própria conta).
     columns:
       - name: activity_date
         data_tests: [unique, not_null]
   - name: fct_linkedin__posts
     description: >
       Posts publicados no período. followers_in_window soma os novos seguidores do
-      dia do post e dos dias seguintes (var follower_attribution_days); inclui a base
-      de seguidores que viriam de qualquer forma, e posts no mesmo dia dividem a janela.
+      dia do post e dos dias seguintes (attribution_window_days: var follower_attribution_days
+      ou automática pelo ritmo de publicação); inclui a base de seguidores que viriam de
+      qualquer forma, e posts no mesmo dia dividem a janela. Se top_posts_list_truncated
+      (mart_linkedin__kpis), só contém os melhores posts de cada export.
     columns:
       - name: post_url
         data_tests: [unique, not_null]
@@ -30,7 +34,9 @@ models:
   - name: agg_linkedin__posts_by_dimension
     description: Medianas por tema, idioma, formato e dia da semana.
   - name: mart_linkedin__kpis
-    description: Indicadores do ano numa linha (concentração, base de seguidores, correlações).
+    description: >
+      Indicadores do histórico numa linha (concentração, base de seguidores, correlações)
+      e sinais de limitação dos dados (top_posts_list_truncated, days_missing_in_coverage).
   - name: mart_linkedin__demographics_comparison
     description: Seguidores x quem vê o conteúdo, por dimensão demográfica.
   - name: dim_linkedin__audience_scd2

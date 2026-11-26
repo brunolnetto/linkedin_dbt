@@ -22,10 +22,15 @@ vars:
   linkedin_export: null
   # true = recarrega um export que já está no histórico (ex.: depois de mudar o staging)
   force_reload: false
-  # Dias com menos impressões que isto contam como "sem post" (base de seguidores)
-  baseline_max_impressions: 40
-  # Janela (dias) para atribuir seguidores a um post: dia do post + N-1 seguintes
-  follower_attribution_days: 3
+  # Fração dos dias com menos impressões da SUA conta que conta como "quase sem
+  # impressões" (base de seguidores). Relativo, para valer em contas de qualquer tamanho.
+  low_activity_quantile: 0.25
+  # Janela (dias) para atribuir seguidores a um post: dia do post + N-1 seguintes.
+  # null = automático: metade do intervalo típico entre posts, entre 1 e 3 dias.
+  follower_attribution_days: null
+  # O LinkedIn lista no máximo este número de posts em cada ranking da aba TOP POSTS.
+  # Quando uma lista chega nele, as análises por post só veem os melhores posts.
+  top_posts_list_limit: 50
 
 # Devolve ao arquivo o espaço de linhas apagadas/substituídas.
 on-run-end:

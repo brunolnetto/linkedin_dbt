@@ -55,7 +55,6 @@ select
     impressions,
     engagements,
     new_followers,
-    impressions < {{ var('baseline_max_impressions') }} as is_low_activity_day,
     is_complete_day,
     export_id                                 as source_export_id
 from picked
