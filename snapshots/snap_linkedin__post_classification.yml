@@ -1,0 +1,14 @@
+snapshots:
+  - name: snap_linkedin__post_classification
+    description: >
+      SCD tipo 2 da classificação dos posts (tema, idioma, formato). Uma nova versão
+      surge quando as regras em seeds/ mudam a classificação de um post. Aqui a validade
+      é o horário da execução, o que está certo: as mudanças vêm das suas edições nas
+      regras, que acontecem em ordem. Atenção: este histórico só existe no banco;
+      apagar linkedin.duckdb o perde (os exports não o reconstroem).
+    relation: ref('int_linkedin__post_classification')
+    config:
+      unique_key: post_url
+      strategy: check
+      check_cols: [topic, language, post_format]
+      hard_deletes: invalidate
