@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: int_linkedin__daily
+    description: Uma linha por dia com impressões, engajamentos e seguidores.
+    columns:
+      - name: activity_date
+        data_tests: [unique, not_null]
+  - name: int_linkedin__posts
+    description: >
+      Um post por URL, juntando as listas top 50 e os posts recentes, com tema,
+      idioma e formato inferidos do slug da URL (seeds topic_rules e language_rules).
+    columns:
+      - name: post_url
+        data_tests: [unique, not_null]
+      - name: post_id
+        data_tests: [not_null, unique]
+      - name: language
+        data_tests: [not_null]
+      - name: topic
+        data_tests: [not_null]
+  - name: int_linkedin__post_classification
+    description: Atributos descritivos do post (fonte do snapshot SCD2).
