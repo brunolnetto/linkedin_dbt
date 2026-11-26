@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: lnd_linkedin__exports
+    description: Um registro por arquivo já carregado (histórico de cargas).
+    columns:
+      - name: export_id
+        data_tests: [unique, not_null]
+  - name: lnd_linkedin__daily
+    description: Linhas diárias de todos os exports carregados, sem deduplicar.
+    data_tests:
+      - unique_combination:
+          arguments: {columns: [export_id, activity_date]}
+  - name: lnd_linkedin__top_posts
+    description: Listas top 50 de cada export.
+  - name: lnd_linkedin__recent_posts
+    description: Aba MOST RECENT POSTS de cada export.
+  - name: lnd_linkedin__demographics
+    description: Fotos do perfil do público em cada export.
