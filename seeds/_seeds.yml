@@ -1,0 +1,18 @@
+version: 2
+seeds:
+  - name: topic_rules
+    description: >
+      Regras para dar um tema a cada post a partir da URL dele (que contém as primeiras
+      palavras e as hashtags). Se a URL contém `pattern`, o post recebe `topic`.
+      Se várias regras batem, vence a de menor `priority`. Posts sem regra ficam como "Outros".
+      Edite à vontade para refletir os seus temas e rode `make report`.
+    columns:
+      - name: pattern
+        data_tests: [not_null, unique]
+  - name: language_rules
+    description: >
+      Heurística de idioma pela URL do post: palavras típicas de cada idioma.
+      Sem regra, o post é considerado inglês (EN). Vence a de menor `priority`.
+    columns:
+      - name: pattern
+        data_tests: [not_null, unique]

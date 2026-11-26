@@ -1,0 +1,39 @@
+priority,pattern,topic
+1,jobsearch,Carreira
+1,opentowork,Carreira
+1,open-to-work,Carreira
+1,between-jobs,Carreira
+1,hiring,Carreira
+1,vaga,Carreira
+1,carreira,Carreira
+1,career,Carreira
+2,softwarearchitecture,Arquitetura de software
+2,domaindriven,Arquitetura de software
+2,hexagonal,Arquitetura de software
+2,distributedsystems,Arquitetura de software
+2,systemdesign,Arquitetura de software
+2,softwareengineering,Arquitetura de software
+3,dataengineering,Engenharia de dados
+3,engenhariadedados,Engenharia de dados
+3,analyticsengineering,Engenharia de dados
+3,data-modeling,Engenharia de dados
+3,modelagem,Engenharia de dados
+3,dbt,Engenharia de dados
+3,databricks,Engenharia de dados
+3,duckdb,Engenharia de dados
+3,spark,Engenharia de dados
+3,cdc,Engenharia de dados
+3,event-streaming,Engenharia de dados
+3,open-table,Engenharia de dados
+3,compute-engines,Engenharia de dados
+3,query-performance,Engenharia de dados
+4,generative-ai,IA
+4,machinelearning,IA
+4,llm,IA
+4,coding-agent,IA
+4,artificialintelligence,IA
+5,python,Programação
+5,networks-protocols,Programação
+5,mathematics,Ciência / matemática
+5,computationalgeometry,Ciência / matemática
+5,pendulum,Ciência / matemática
