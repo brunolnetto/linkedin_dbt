@@ -1,0 +1,57 @@
+unit_tests:
+  - name: audience_scd2_versions_independent_of_load_order
+    description: >
+      Três exports (ordem de download: e1 < e2 < e3), listados fora de ordem.
+      Senior: 37% em e1 e e2, 40% em e3 -> 2 versões. Nubank: presente em e1,
+      some em e2, volta em e3 -> 3 versões (a do meio com is_present = false).
+    model: dim_linkedin__audience_scd2
+    given:
+      - input: ref('lnd_linkedin__exports')
+        rows:
+          - {export_id: e3, downloaded_at: "2026-09-01 10:00:00"}
+          - {export_id: e1, downloaded_at: "2026-01-01 10:00:00"}
+          - {export_id: e2, downloaded_at: "2026-05-01 10:00:00"}
+      - input: ref('lnd_linkedin__demographics')
+        rows:
+          - {export_id: e3, audience: followers, dimension: Seniority, dimension_value: Senior, share_label: "40%", share: 0.40, is_below_1pct: false}
+          - {export_id: e1, audience: followers, dimension: Seniority, dimension_value: Senior, share_label: "37%", share: 0.37, is_below_1pct: false}
+          - {export_id: e2, audience: followers, dimension: Seniority, dimension_value: Senior, share_label: "37%", share: 0.37, is_below_1pct: false}
+          - {export_id: e1, audience: followers, dimension: Company, dimension_value: Nubank, share_label: "< 1%", share: null, is_below_1pct: true}
+          - {export_id: e3, audience: followers, dimension: Company, dimension_value: Nubank, share_label: "< 1%", share: null, is_below_1pct: true}
+    expect:
+      rows:
+        - {dimension_value: Senior, version: 1, share_label: "37%", is_present: true,  exports_in_version: 2, is_current: false}
+        - {dimension_value: Senior, version: 2, share_label: "40%", is_present: true,  exports_in_version: 1, is_current: true}
+        - {dimension_value: Nubank, version: 1, share_label: "< 1%", is_present: true,  exports_in_version: 1, is_current: false}
+        - {dimension_value: Nubank, version: 2, share_label: null,   is_present: false, exports_in_version: 1, is_current: false}
+        - {dimension_value: Nubank, version: 3, share_label: "< 1%", is_present: true,  exports_in_version: 1, is_current: true}
+
+  - name: daily_latest_complete_export_wins
+    description: >
+      Export "jan" (baixado 31/01) cobre 30 e 31/01; export "fev" (baixado 02/02)
+      cobre 31/01 e 01-02/02. 31/01 vem do "fev" (baixado depois, dia completo);
+      02/02 é o dia do download do "fev" e fica marcado como incompleto.
+    model: int_linkedin__daily
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('lnd_linkedin__exports')
+        rows:
+          - {export_id: fev, downloaded_at: "2026-02-02 09:00:00"}
+          - {export_id: jan, downloaded_at: "2026-01-31 20:00:00"}
+      - input: ref('lnd_linkedin__daily')
+        rows:
+          - {export_id: jan, activity_date: 2026-01-30, impressions: 100, engagements: 1, new_followers: 1}
+          - {export_id: jan, activity_date: 2026-01-31, impressions: 50,  engagements: 0, new_followers: 0}
+          - {export_id: fev, activity_date: 2026-01-31, impressions: 210, engagements: 3, new_followers: 2}
+          - {export_id: fev, activity_date: 2026-02-01, impressions: 90,  engagements: 1, new_followers: 1}
+          - {export_id: fev, activity_date: 2026-02-02, impressions: 15,  engagements: 0, new_followers: 0}
+      - input: ref('stg_linkedin__export_file')
+        rows: []
+    expect:
+      rows:
+        - {activity_date: 2026-01-30, impressions: 100, source_export_id: jan, is_complete_day: true}
+        - {activity_date: 2026-01-31, impressions: 210, source_export_id: fev, is_complete_day: true}
+        - {activity_date: 2026-02-01, impressions: 90,  source_export_id: fev, is_complete_day: true}
+        - {activity_date: 2026-02-02, impressions: 15,  source_export_id: fev, is_complete_day: false}
