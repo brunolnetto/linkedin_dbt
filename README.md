@@ -52,6 +52,16 @@ make load
 
 Abra `output/relatorio_linkedin.html` no navegador.
 
+### 4. (Opcional) Peça uma análise a uma IA
+
+O comando também gera `output/analise_llm.md`: seus dados consolidados e instruções de análise, prontos
+para colar no assistente de IA que você preferir (ChatGPT, Claude, Gemini, um modelo local...). No
+relatório, o botão **Copiar prompt** faz o mesmo.
+
+O código calcula os números e detecta os limites dos dados; as instruções pedem que a IA pergunte o seu
+objetivo antes de recomendar, cite os números e diga "sem diferença clara" quando os dados não sustentam
+uma conclusão. A IA também agrupa os posts por tema a partir dos títulos, sem depender das regras de tema.
+
 ## Atualizando com novos exports
 
 Baixe um export novo quando quiser, coloque em `exports/` e rode `make load` de novo.
@@ -70,7 +80,8 @@ Baixe um export novo quando quiser, coloque em `exports/` e rode `make load` de 
 | `make load` | Carrega os exports de `exports/` e gera o relatório |
 | `make load FILE=caminho/export.xlsx` | Carrega um arquivo de outro lugar |
 | `make report` | Gera o relatório de novo sem ler os `.xlsx` (ex.: depois de editar os temas) |
-| `make test` | Confere a integridade dos dados |
+| `make prompt` | Gera só o `output/analise_llm.md` para colar numa IA |
+| `make test` | Confere a integridade dos dados e as frases automáticas |
 | `make docs` | Abre a documentação de todas as tabelas no navegador |
 | `make compact` | Reduz o tamanho do banco |
 | `make reset CONFIRM=sim` | Apaga o histórico para começar do zero (os `.xlsx` ficam) |
@@ -97,6 +108,8 @@ Dica: para ver as URLs dos seus posts, abra a aba `TOP POSTS` do seu `.xlsx`.
 ## Seus dados ficam com você
 
 - Tudo roda localmente. Nada é enviado para serviços externos.
+- O `analise_llm.md` contém os títulos dos seus posts e o perfil do seu público. Ele só sai do seu
+  computador se você colar o conteúdo num assistente de IA.
 - O `.gitignore` impede que `exports/`, `output/` e o banco `linkedin.duckdb` entrem no git.
   Se fizer um fork, seus dados não vão junto.
 - O relatório carrega fontes do Google Fonts ao ser aberto; os dados ficam dentro do próprio arquivo.
@@ -127,7 +140,7 @@ sobrepostos são combinados, dimensões SCD2 e testes.
 
 ```
 exports/     seus .xlsx (fora do git)
-output/      relatório gerado (fora do git)
+output/      relatório e prompt gerados (fora do git)
 models/      transformações dbt: staging → landing → intermediate → marts
 seeds/       regras de tema e idioma (edite à vontade)
 snapshots/   histórico da classificação dos posts

@@ -4,7 +4,7 @@ DBT := .venv/bin/dbt
 PY  := .venv/bin/python
 export DBT_PROFILES_DIR := .
 
-.PHONY: help setup load report test docs compact clean reset
+.PHONY: help setup load report prompt test docs compact clean reset
 
 help: ## Mostra esta ajuda
 	@echo "Uso: make <comando>"
@@ -20,6 +20,9 @@ load: ## Carrega os exports de exports/ e gera o relatório. Ou: make load FILE=
 report: ## Recalcula tudo a partir do histórico (sem ler xlsx) e gera o relatório
 	@$(DBT) --quiet build
 	@$(PY) -I scripts/build_report.py
+
+prompt: ## Gera output/analise_llm.md para colar no assistente de IA que preferir
+	@$(PY) -I scripts/build_prompt.py
 
 test: ## Roda os testes de dados e os unit tests
 	@$(DBT) test

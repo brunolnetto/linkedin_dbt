@@ -1,4 +1,4 @@
-"""Gera output/relatorio_linkedin.html a partir das tabelas do dbt.
+"""Gera output/relatorio_linkedin.html e output/analise_llm.md a partir das tabelas do dbt.
 
 Rode depois de carregar pelo menos um export (`make load`). Normalmente você não
 chama este script direto: `make load` e `make report` já o executam.
@@ -11,6 +11,7 @@ import sys
 import duckdb
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from build_prompt import PROMPT_OUTPUT, render_prompt  # noqa: E402
 from insights import build_caveats, build_highlights  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -21,7 +22,8 @@ OUTPUT = ROOT / "output" / "relatorio_linkedin.html"
 MES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
 
-def main():
+def load_data():
+    """Lê os marts e devolve tudo o que o relatório e o prompt usam."""
     if not DB.exists():
         sys.exit("Banco não encontrado. Carregue um export primeiro: make load")
 
@@ -60,11 +62,11 @@ def main():
         months.append(dict(label=label, n=r["posts"], i=r["impressions"], e=r["engagements"],
                            f=r["new_followers"], partial=not r["is_month_fully_covered"]))
 
-    seniority = [[v, f, c] for v, f, c in rows("""
-        select dimension_value, followers_share, content_viewers_share
+    audience = records("""
+        select dimension, dimension_value as value, followers_share as followers, content_viewers_share as viewers
         from mart_linkedin__demographics_comparison
-        where dimension = 'Seniority'
-        order by coalesce(followers_share, 0) + coalesce(content_viewers_share, 0) desc""")]
+        order by dimension, coalesce(followers_share, 0) + coalesce(content_viewers_share, 0) desc""")
+    seniority = [[a["value"], a["followers"], a["viewers"]] for a in audience if a["dimension"] == "Seniority"]
 
     # Rótulos nos 3 maiores picos semanais: o post com mais impressões publicado na semana ou na anterior.
     annotations = []
@@ -76,19 +78,30 @@ def main():
         if top:
             annotations.append([str(wk), top[0][0].replace("-", " ")[:40]])
 
-    highlights = build_highlights(kpis, posts, months, seniority)
-    caveats = build_caveats(kpis, posts, months)
+    return dict(
+        kpis={k: (str(v) if isinstance(v, (dt.date, dt.datetime)) else v) for k, v in kpis.items()},
+        weeks=weeks, posts=posts, topics=topics, months=months, audience=audience,
+        seniority=seniority, annotations=annotations,
+        highlights=build_highlights(kpis, posts, months, seniority),
+        caveats=build_caveats(kpis, posts, months),
+        generated_at=dt.datetime.now().strftime("%d/%m/%Y %H:%M"),
+    )
 
-    data = dict(kpis={k: (str(v) if isinstance(v, (dt.date, dt.datetime)) else v) for k, v in kpis.items()},
-                weeks=weeks, posts=posts, topics=topics, months=months, seniority=seniority,
-                annotations=annotations, highlights=highlights, caveats=caveats,
-                generated_at=dt.datetime.now().strftime("%d/%m/%Y %H:%M"))
 
-    html = TEMPLATE.read_text(encoding="utf-8").replace("/*DATA*/null", json.dumps(data, ensure_ascii=False, default=str))
-    OUTPUT.parent.mkdir(exist_ok=True)
+def main():
+    data = load_data()
+    prompt = render_prompt(data)
+    PROMPT_OUTPUT.parent.mkdir(exist_ok=True)
+    PROMPT_OUTPUT.write_text(prompt, encoding="utf-8")
+
+    page = dict(data, prompt=prompt)
+    html = TEMPLATE.read_text(encoding="utf-8").replace(
+        "/*DATA*/null", json.dumps(page, ensure_ascii=False, default=str).replace("</", "<\\/"))
     OUTPUT.write_text(html, encoding="utf-8")
     print(f"Relatório gerado: {OUTPUT}")
-    print(f"  {len(posts)} posts, {len(weeks)} semanas, {kpis['exports_loaded']} export(s). Abra o arquivo no navegador.")
+    print(f"Prompt para IA:   {PROMPT_OUTPUT}")
+    print(f"  {len(data['posts'])} posts, {len(data['weeks'])} semanas, {data['kpis']['exports_loaded']} export(s). "
+          "Abra o relatório no navegador.")
 
 
 if __name__ == "__main__":
