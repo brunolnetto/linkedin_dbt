@@ -1,0 +1,45 @@
+version: 2
+models:
+  - name: fct_linkedin__daily
+    description: Série diária com taxa de engajamento e médias móveis de 7 dias.
+    columns:
+      - name: activity_date
+        data_tests: [unique, not_null]
+  - name: fct_linkedin__posts
+    description: >
+      Posts publicados no período. followers_in_window soma os novos seguidores do
+      dia do post e dos dias seguintes (var follower_attribution_days); inclui a base
+      de seguidores que viriam de qualquer forma, e posts no mesmo dia dividem a janela.
+    columns:
+      - name: post_url
+        data_tests: [unique, not_null]
+      - name: engagement_rate
+        data_tests:
+          - rate_between_0_and_1:
+              config: {severity: warn}
+  - name: agg_linkedin__weekly
+    description: Totais por semana (segunda a domingo).
+    columns:
+      - name: week_start
+        data_tests: [unique, not_null]
+  - name: agg_linkedin__monthly
+    description: Totais por mês, com nº de posts e seguidores por mil impressões.
+    columns:
+      - name: month_start
+        data_tests: [unique, not_null]
+  - name: agg_linkedin__posts_by_dimension
+    description: Medianas por tema, idioma, formato e dia da semana.
+  - name: mart_linkedin__kpis
+    description: Indicadores do ano numa linha (concentração, base de seguidores, correlações).
+  - name: mart_linkedin__demographics_comparison
+    description: Seguidores x quem vê o conteúdo, por dimensão demográfica.
+  - name: dim_linkedin__audience_scd2
+    description: >
+      SCD2 do perfil do público, uma versão por período em que o percentual de um item
+      ficou igual. Ordenado pela data de download, então independe da ordem de carga.
+    data_tests:
+      - unique_combination:
+          arguments: {columns: [audience, dimension, dimension_value, valid_from]}
+    columns:
+      - name: scd_id
+        data_tests: [unique, not_null]
