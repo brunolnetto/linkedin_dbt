@@ -1,0 +1,36 @@
+version: 2
+models:
+  - name: stg_linkedin__overview
+    description: Totais da aba DISCOVERY.
+  - name: stg_linkedin__daily_engagement
+    description: Impressões e engajamentos por dia (aba ENGAGEMENT).
+    columns:
+      - name: activity_date
+        data_tests: [unique, not_null]
+      - name: impressions
+        data_tests: [not_null]
+  - name: stg_linkedin__daily_followers
+    description: Novos seguidores por dia (aba FOLLOWERS).
+    columns:
+      - name: activity_date
+        data_tests: [unique, not_null]
+  - name: stg_linkedin__follower_total
+    description: Total de seguidores na data do export.
+  - name: stg_linkedin__top_posts
+    description: As duas listas top 50 (por engajamento e por impressões) empilhadas.
+    columns:
+      - name: ranking_metric
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [engagements, impressions]
+  - name: stg_linkedin__recent_posts
+    description: Métricas completas dos posts mais recentes (aba MOST RECENT POSTS).
+  - name: stg_linkedin__demographics
+    description: Perfil dos seguidores e de quem viu o conteúdo, empilhados.
+    columns:
+      - name: audience
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [followers, content_viewers]
