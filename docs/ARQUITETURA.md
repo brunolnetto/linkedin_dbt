@@ -89,6 +89,9 @@ Recarregar um export já carregado:
 - **Testes de dados:** unicidade das chaves; taxa de engajamento entre 0 e 1; uma única versão atual,
   sem sobreposição, por item do SCD2; `assert_export_daily_matches_overview` (em cada export, a soma
   diária bate com o total da aba DISCOVERY; se o LinkedIn mudar o layout da planilha, este falha).
+- **Frases do relatório** (`tests_py/test_insights.py`, contas simuladas: pequena, grande e estável,
+  posta todo dia, histórico curto): toda comparação responde nos dois sentidos ou "sem diferença clara",
+  grupos pequenos ficam de fora e listas truncadas geram aviso e suprimem frases de contagem.
 
 ## Espaço em disco
 

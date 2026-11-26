@@ -24,8 +24,9 @@ report: ## Recalcula tudo a partir do histórico (sem ler xlsx) e gera o relató
 prompt: ## Gera output/analise_llm.md para colar no assistente de IA que preferir
 	@$(PY) -I scripts/build_prompt.py
 
-test: ## Roda os testes de dados e os unit tests
+test: ## Roda os testes de dados, os unit tests e os testes das frases do relatório
 	@$(DBT) test
+	@$(PY) -I -m unittest discover -s tests_py
 
 docs: ## Abre a documentação do dbt (modelos, colunas e linhagem) no navegador
 	@$(DBT) docs generate --quiet && $(DBT) docs serve
