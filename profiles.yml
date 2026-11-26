@@ -1,0 +1,9 @@
+linkedin_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: linkedin.duckdb
+      threads: 4
+      extensions:
+        - excel

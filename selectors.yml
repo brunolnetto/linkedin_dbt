@@ -1,0 +1,19 @@
+selectors:
+  # `dbt build` sem argumentos: recalcula a partir do histórico, sem ler xlsx.
+  - name: transform
+    default: true
+    description: Tudo exceto staging e landing (não lê arquivo).
+    definition:
+      union:
+        - method: fqn
+          value: "*"
+        - exclude:
+            - method: tag
+              value: ingest
+
+  # Usado por scripts/ingest.sh: lê o arquivo, grava no histórico e recalcula.
+  - name: ingest
+    description: Projeto inteiro, incluindo a leitura do arquivo.
+    definition:
+      method: fqn
+      value: "*"

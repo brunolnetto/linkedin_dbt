@@ -1,0 +1,21 @@
+# Ambiente e artefatos do dbt
+.venv/
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Banco local (contém seus dados)
+*.duckdb
+*.duckdb.wal
+*.duckdb.bak
+
+# Seus dados e relatórios: nunca vão para o git
+exports/*
+!exports/.gitkeep
+output/*
+!output/.gitkeep
+*.xlsx
+*:Zone.Identifier
+
+__pycache__/

@@ -1,0 +1,49 @@
+name: linkedin_analytics
+version: "1.0.0"
+config-version: 2
+profile: linkedin_analytics
+
+# Nada sai do seu computador: sem estatísticas de uso e sem checagem de versão online.
+flags:
+  send_anonymous_usage_stats: false
+  version_check: false
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+snapshot-paths: ["snapshots"]
+target-path: target
+clean-targets: [target, dbt_packages, logs]
+
+vars:
+  # Export do LinkedIn (.xlsx) a carregar. Vazio por padrão: sem arquivo, o build
+  # só recalcula (seletor "transform"). Para carregar use scripts/ingest.sh <arquivo>.
+  linkedin_export: null
+  # true = recarrega um export que já está no histórico (ex.: depois de mudar o staging)
+  force_reload: false
+  # Dias com menos impressões que isto contam como "sem post" (base de seguidores)
+  baseline_max_impressions: 40
+  # Janela (dias) para atribuir seguidores a um post: dia do post + N-1 seguintes
+  follower_attribution_days: 3
+
+# Devolve ao arquivo o espaço de linhas apagadas/substituídas.
+on-run-end:
+  - "checkpoint"
+
+models:
+  linkedin_analytics:
+    staging:
+      +materialized: view
+      +tags: [ingest]
+    landing:
+      +tags: [ingest]
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
+
+seeds:
+  linkedin_analytics:
+    +column_types:
+      priority: integer

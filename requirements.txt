@@ -1,0 +1,4 @@
+# Versões testadas. Instale com: make setup
+dbt-core==1.12.7
+dbt-duckdb==1.11.1
+duckdb==2.0.1
