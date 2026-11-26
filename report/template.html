@@ -72,7 +72,7 @@ footer{font-size:.8rem;color:var(--muted)}
 <section>
   <h2>O que os dados mostram</h2>
   <ul class="highlights" id="highlights"></ul>
-  <p class="muted">Frases geradas automaticamente a partir das tabelas do dbt. Correlação não é causa: use como pista, não como prova.</p>
+  <p class="muted">Frases geradas automaticamente a partir das tabelas do dbt. Cada pergunta pode ter qualquer resposta, inclusive "sem diferença clara"; grupos com menos de 5 posts ficam de fora. Correlação não é causa: use como pista, não como prova. Veja os limites dos dados no fim da página.</p>
 </section>
 
 <section>
@@ -95,11 +95,7 @@ footer{font-size:.8rem;color:var(--muted)}
 </section>
 
 <div class="note"><strong>Limites dos dados</strong>
-  <ul>
-    <li>O LinkedIn só exporta métricas por post para os 50 posts com mais impressões e os 50 com mais engajamento. Posts fora dessas listas não aparecem.</li>
-    <li>As métricas de um post contam só o que aconteceu dentro da janela do export.</li>
-    <li>O LinkedIn não informa seguidores por post (só nos mais recentes); a atribuição por janela é aproximada.</li>
-  </ul>
+  <ul id="caveats"></ul>
 </div>
 <footer id="footer"></footer>
 </main>
@@ -126,6 +122,7 @@ document.getElementById('kpis').innerHTML=[
   [pct(K.engagement_rate,2),'taxa de engajamento'],[`+${fmt(K.new_followers)}`,`novos seguidores (total ${fmt(K.total_followers)})`]
 ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join('');
 document.getElementById('highlights').innerHTML=DATA.highlights.map(h=>`<li>${esc(h)}</li>`).join('');
+document.getElementById('caveats').innerHTML=DATA.caveats.map(h=>`<li>${esc(h)}</li>`).join('');
 document.getElementById('footer').textContent=`Gerado em ${DATA.generated_at} pelo projeto dbt.`;
 
 // barras semanais
@@ -150,7 +147,7 @@ function weekBars(id,idx,annot,baseline){
 const base=K.baseline_followers_per_day?K.baseline_followers_per_day*7:null;
 weekBars('c-weeks',1,DATA.annotations);
 weekBars('c-fol',3,[],base);
-document.getElementById('baseline-legend').textContent=base?`tracejado: ~${dec(base.toFixed(1))}/semana em dias quase sem impressões`:'';
+document.getElementById('baseline-legend').textContent=base?`tracejado: ~${dec(base.toFixed(1))}/semana no ritmo dos dias com menos impressões`:'';
 
 // dispersão por idioma
 (function(){const box=document.getElementById('c-scatter'),W=740,H=300,m={l:44,r:14,t:12,b:32};
@@ -174,7 +171,8 @@ document.getElementById('baseline-legend').textContent=base?`tracejado: ~${dec(b
 })();
 
 // tabela de temas
-(function(){const rows=DATA.topics.slice().sort((a,b)=>(b.er||0)-(a.er||0));const maxEr=Math.max(...rows.map(r=>r.er||0),1e-9);
+(function(){if(!DATA.topics.some(r=>r.k!=='Outros')){document.getElementById('t-topics').closest('.tablewrap').hidden=true;return}
+  const rows=DATA.topics.slice().sort((a,b)=>(b.er||0)-(a.er||0));const maxEr=Math.max(...rows.map(r=>r.er||0),1e-9);
   document.getElementById('t-topics').innerHTML='<thead><tr><th>Tema</th><th>Posts</th><th>Impressões</th><th>Impr. mediana</th><th>Eng. mediano</th><th>Taxa eng. mediana</th><th>Seguidores na janela (med.)</th></tr></thead><tbody>'+
    rows.map(r=>`<tr><td>${esc(r.k)}</td><td>${r.n}</td><td>${fmt(r.imp)}</td><td>${fmt(Math.round(r.mi||0))}</td><td>${dec(r.me??'–')}</td><td>${pct(r.er||0)}<span class="bar" style="width:${Math.round(60*(r.er||0)/maxEr)}px"></span></td><td>${dec(r.f??'–')}</td></tr>`).join('')+'</tbody>';
 })();
