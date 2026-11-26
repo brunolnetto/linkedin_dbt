@@ -56,7 +56,8 @@ Abra `output/relatorio_linkedin.html` no navegador.
 
 O comando também gera `output/analise_llm.md`: seus dados consolidados e instruções de análise, prontos
 para colar no assistente de IA que você preferir (ChatGPT, Claude, Gemini, um modelo local...). No
-relatório, o botão **Copiar prompt** faz o mesmo.
+relatório, marque seu objetivo (ganhar seguidores, ser encontrado por recrutadores...) e use o botão
+**Copiar prompt**. Sem objetivo, a IA pergunta antes de analisar.
 
 O código calcula os números e detecta os limites dos dados; as instruções pedem que a IA pergunte o seu
 objetivo antes de recomendar, cite os números e diga "sem diferença clara" quando os dados não sustentam
@@ -80,7 +81,7 @@ Baixe um export novo quando quiser, coloque em `exports/` e rode `make load` de 
 | `make load` | Carrega os exports de `exports/` e gera o relatório |
 | `make load FILE=caminho/export.xlsx` | Carrega um arquivo de outro lugar |
 | `make report` | Gera o relatório de novo sem ler os `.xlsx` (ex.: depois de editar os temas) |
-| `make prompt` | Gera só o `output/analise_llm.md` para colar numa IA |
+| `make prompt OBJETIVO="..."` | Gera só o `output/analise_llm.md` para colar numa IA, já com seu objetivo (opcional) |
 | `make test` | Confere a integridade dos dados e as frases automáticas |
 | `make docs` | Abre a documentação de todas as tabelas no navegador |
 | `make compact` | Reduz o tamanho do banco |

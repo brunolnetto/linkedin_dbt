@@ -11,7 +11,7 @@ import sys
 import duckdb
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from build_prompt import PROMPT_OUTPUT, render_prompt  # noqa: E402
+from build_prompt import GOAL_ASK, PROMPT_OUTPUT, render_prompt  # noqa: E402
 from insights import build_caveats, build_highlights  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -94,7 +94,7 @@ def main():
     PROMPT_OUTPUT.parent.mkdir(exist_ok=True)
     PROMPT_OUTPUT.write_text(prompt, encoding="utf-8")
 
-    page = dict(data, prompt=prompt)
+    page = dict(data, prompt=prompt, prompt_goal_line=GOAL_ASK)
     html = TEMPLATE.read_text(encoding="utf-8").replace(
         "/*DATA*/null", json.dumps(page, ensure_ascii=False, default=str).replace("</", "<\\/"))
     OUTPUT.write_text(html, encoding="utf-8")

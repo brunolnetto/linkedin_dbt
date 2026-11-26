@@ -57,6 +57,12 @@ tr:last-child td{border-bottom:0}
 td .bar{display:inline-block;height:8px;border-radius:0 2px 2px 0;background:var(--s1);vertical-align:middle;margin-left:8px}
 .note{font-size:.85rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
 .note ul{margin:6px 0 0;padding-left:18px}
+.goals{border:1px solid var(--line);border-radius:6px;padding:10px 14px 12px;margin:0;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.goals legend{font-size:.85rem;color:var(--muted);padding:0 4px}
+#goal-options{display:flex;flex-wrap:wrap;gap:6px 18px}
+#goal-options label{font-size:.9rem;display:flex;gap:6px;align-items:center;cursor:pointer}
+.goal-detail{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.goal-detail input{font:inherit;font-size:.9rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;min-width:0}
 .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 button{font:500 .9rem var(--f-body);padding:9px 16px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer}
 button.secondary{background:transparent;color:var(--accent)}
@@ -96,6 +102,10 @@ footer{font-size:.8rem;color:var(--muted)}
 <section>
   <h2>Analisar com IA</h2>
   <p>Copie seus dados e as instruções de análise e cole no assistente de IA que preferir. As instruções pedem que a IA pergunte seu objetivo, cite os números e diga quando os dados não sustentam uma conclusão.</p>
+  <fieldset class="goals"><legend>Seu objetivo (opcional; sem ele, a IA pergunta antes de analisar)</legend>
+    <div id="goal-options"></div>
+    <label class="goal-detail">Detalhes <input type="text" id="goal-detail" placeholder="ex.: vagas de engenharia de dados no exterior, público de gestores"></label>
+  </fieldset>
   <div class="actions"><button type="button" id="copy-prompt">Copiar prompt</button><button type="button" id="dl-prompt" class="secondary">Baixar .md</button><span class="muted" id="copy-status" role="status"></span></div>
   <p class="muted">O texto inclui os títulos dos seus posts e o perfil do seu público. Nada é enviado por esta página: os dados só saem do seu computador se você colar em algum lugar.</p>
 </section>
@@ -134,14 +144,24 @@ document.getElementById('kpis').innerHTML=[
 ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join('');
 document.getElementById('highlights').innerHTML=DATA.highlights.map(h=>`<li>${esc(h)}</li>`).join('');
 document.getElementById('caveats').innerHTML=DATA.caveats.map(h=>`<li>${esc(h)}</li>`).join('');
+const GOALS=['Ganhar seguidores','Ser encontrado por recrutadores','Atrair clientes ou projetos','Construir autoridade num tema','Ampliar a rede na minha área'];
+document.getElementById('goal-options').innerHTML=GOALS.map((g,i)=>`<label><input type="checkbox" value="${i}">${g}</label>`).join('');
+const goalBoxes=[...document.querySelectorAll('#goal-options input')],goalDetail=document.getElementById('goal-detail');
+try{const saved=JSON.parse(localStorage.getItem('goal')||'null');if(saved){goalBoxes.forEach(b=>b.checked=saved.g.includes(+b.value));goalDetail.value=saved.d||''}}catch(_){}
+const saveGoal=()=>{try{localStorage.setItem('goal',JSON.stringify({g:goalBoxes.filter(b=>b.checked).map(b=>+b.value),d:goalDetail.value}))}catch(_){}};
+goalBoxes.forEach(b=>b.addEventListener('change',saveGoal));goalDetail.addEventListener('input',saveGoal);
+function promptText(){const g=goalBoxes.filter(b=>b.checked).map(b=>GOALS[+b.value].toLowerCase()),d=goalDetail.value.trim();
+  if(!g.length&&!d)return DATA.prompt;
+  const goal=[g.length?g.join('; ')+(g.length>1?' (nesta ordem de prioridade)':''):'',d?(g.length?'Detalhes: ':'')+d:''].filter(Boolean).join('. ');
+  return DATA.prompt.replace(DATA.prompt_goal_line,`1. **Meu objetivo:** ${goal}. Analise e recomende em função dele, sem perguntar de novo.\n   Diga quais métricas abaixo indicam progresso nesse objetivo e quais não dizem nada sobre ele.`)}
 (function(){const status=document.getElementById('copy-status');
   const say=t=>{status.textContent=t;setTimeout(()=>status.textContent='',4000)};
   document.getElementById('copy-prompt').addEventListener('click',async()=>{
-    try{await navigator.clipboard.writeText(DATA.prompt);say('Copiado. Cole no assistente de IA.')}
-    catch(e){const t=document.createElement('textarea');t.value=DATA.prompt;document.body.appendChild(t);t.select();
+    try{await navigator.clipboard.writeText(promptText());say('Copiado. Cole no assistente de IA.')}
+    catch(e){const t=document.createElement('textarea');t.value=promptText();document.body.appendChild(t);t.select();
       try{document.execCommand('copy');say('Copiado. Cole no assistente de IA.')}catch(_){say('Não deu para copiar. Use "Baixar .md".')}t.remove()}});
   document.getElementById('dl-prompt').addEventListener('click',()=>{
-    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([DATA.prompt],{type:'text/markdown'}));
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([promptText()],{type:'text/markdown'}));
     a.download='analise_llm.md';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
 })();
 document.getElementById('footer').textContent=`Gerado em ${DATA.generated_at} pelo projeto dbt.`;

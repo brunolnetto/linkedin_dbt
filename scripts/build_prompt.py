@@ -6,7 +6,10 @@ Nada é enviado por este script: você decide se e onde colar o arquivo.
 O código calcula os números e os limites dos dados; a IA só interpreta. As
 instruções pedem que ela não afirme diferenças que os dados não sustentam.
 
-Uso: make prompt   (make load e make report também geram o arquivo)
+Uso: make prompt                                    (a IA pergunta seu objetivo)
+     make prompt OBJETIVO="ser encontrado por recrutadores de dados"
+make load e make report também geram o arquivo, sem objetivo. No relatório HTML,
+dá para marcar o objetivo antes de copiar.
 """
 import pathlib
 import sys
@@ -19,6 +22,18 @@ PROMPT_OUTPUT = ROOT / "output" / "analise_llm.md"
 
 MAX_POSTS = 200        # posts listados no prompt (os mais recentes)
 MAX_AUDIENCE_ROWS = 8  # linhas por dimensão do público
+
+# Regra 1 do prompt. Sem objetivo, a IA pergunta antes de analisar. O relatório HTML
+# troca esta linha exata pelo objetivo marcado na página (ver goal_rule no template).
+GOAL_ASK = ("1. **Comece perguntando o meu objetivo** (ex.: ganhar seguidores, ser encontrado por recrutadores,\n"
+            "   gerar clientes, construir autoridade num tema) e só recomende algo depois da resposta.")
+
+
+def goal_rule(goal):
+    if not goal:
+        return GOAL_ASK
+    return (f"1. **Meu objetivo:** {goal.strip()}. Analise e recomende em função dele, sem perguntar de novo.\n"
+            "   Diga quais métricas abaixo indicam progresso nesse objetivo e quais não dizem nada sobre ele.")
 
 
 def _cell(v, kind=None):
@@ -37,7 +52,7 @@ def table(headers, rows):
     return "\n".join(out)
 
 
-def render_prompt(data):
+def render_prompt(data, goal=None):
     k = data["kpis"]
     posts = data["posts"][-MAX_POSTS:]
     s = []
@@ -50,8 +65,7 @@ números como estão; não invente métricas que não estão aqui.
 
 ## Regras para a sua análise
 
-1. **Comece perguntando o meu objetivo** (ex.: ganhar seguidores, ser encontrado por recrutadores,
-   gerar clientes, construir autoridade num tema) e só recomende algo depois da resposta.
+{goal_rule(goal)}
 2. **Toda comparação pode ter três respostas:** A maior que B, B maior que A, ou sem diferença clara.
    Trate como "sem diferença clara" grupos com menos de {MIN_POSTS_PER_GROUP} posts ou diferenças menores que
    {int(MIN_RELATIVE_DIFF * 100)}% entre medianas. Com menos de {FEW_POSTS_PER_GROUP} posts por grupo, chame de hipótese, não de conclusão.
@@ -132,9 +146,12 @@ Período: {k['coverage_start']} a {k['coverage_end']} ({k['days_covered']} dias,
 
 def main():
     from build_report import load_data
+    goal = " ".join(sys.argv[1:]).strip() or None
     PROMPT_OUTPUT.parent.mkdir(exist_ok=True)
-    PROMPT_OUTPUT.write_text(render_prompt(load_data()), encoding="utf-8")
+    PROMPT_OUTPUT.write_text(render_prompt(load_data(), goal), encoding="utf-8")
     print(f"Prompt gerado: {PROMPT_OUTPUT}")
+    if not goal:
+        print('A IA vai perguntar seu objetivo. Para já informar: make prompt OBJETIVO="..."')
     print("Ele contém os títulos dos seus posts e o perfil do seu público. Você decide se e onde colar.")
 
 

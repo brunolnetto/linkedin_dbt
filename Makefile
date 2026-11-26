@@ -21,8 +21,8 @@ report: ## Recalcula tudo a partir do histórico (sem ler xlsx) e gera o relató
 	@$(DBT) --quiet build
 	@$(PY) -I scripts/build_report.py
 
-prompt: ## Gera output/analise_llm.md para colar no assistente de IA que preferir
-	@$(PY) -I scripts/build_prompt.py
+prompt: ## Gera output/analise_llm.md para colar numa IA. Opcional: OBJETIVO="..."
+	@$(PY) -I scripts/build_prompt.py $(if $(OBJETIVO),"$(OBJETIVO)")
 
 test: ## Roda os testes de dados, os unit tests e os testes das frases do relatório
 	@$(DBT) test
